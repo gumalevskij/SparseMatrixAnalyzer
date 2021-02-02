@@ -5,8 +5,8 @@
 struct MatrixCSR
 {
 	//Matrix info
-	int sz_col;
 	int sz_row;
+	int sz_col;
 	int sz_elem;
 
 	//COO
@@ -16,9 +16,9 @@ struct MatrixCSR
 	double* valA;
 
 	//CSR
-	int * crs_ia;
-	int * crs_ja;
-	double * crs_aa;
+	int * csr_ia;
+	int * csr_ja;
+	double * csr_aa;
 
 	//CCS
 	int* ccs_ia;
@@ -28,15 +28,28 @@ struct MatrixCSR
 	//properties
 	bool is_init_data;
 	bool is_symmetrical;
+	double MinElement;
+	double MaxElement;
+	double MinModElement;
+	double MaxModElement;
+	double MaxDiag;
+	double MinDiag;
+	double MaxModDiag;
+	double MinModDiag;
+
 
 	//Graph
 	vector<bool> used;
 	vector<int> comp;
 
 	int ReadMtx();
+	int ReadSortMtx();
 	int CCStoCRS();
+	int CRStoCCS();
 	int Write_crs();
 	int Write_ccs();
 	int ConvertMatrixMtxToCCS();
+	int ConvertMatrixMtxToCSR();
+	int CalculateProperties();
 	void Clear();
 };

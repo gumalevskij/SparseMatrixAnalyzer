@@ -1,15 +1,15 @@
 #pragma once
-
+#define _CRT_SECURE_NO_WARNINGS
 #include "Matrix_CSR.h"
 
 int main()
 {
 	MatrixCSR mtxCSR;
-	mtxCSR.ReadMtx();
-	mtxCSR.ConvertMatrixMtxToCCS();
-	mtxCSR.CCStoCRS();
-	mtxCSR.Write_ccs();
+	mtxCSR.ReadSortMtx();
+	mtxCSR.ConvertMatrixMtxToCSR();
 	mtxCSR.Write_crs();
+	mtxCSR.CalculateProperties();
 	mtxCSR.Clear();
+	return 1;
 }
 
