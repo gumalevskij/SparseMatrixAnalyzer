@@ -1,6 +1,7 @@
 #include "Matrix_CSR.h"
 #include <map>
 #include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -320,6 +321,46 @@ int MatrixCSR::CalculateProperties()
 	return 0;
 }
 
+void MatrixCSR::Create_out_html()
+{
+  
+  ofstream stream1((path_to_matrix+".out.html").c_str());
+  stream1 << "<h1 style=\"color: #5e9ca0;\">Matrix characteristics for " <<  path_to_matrix << " </h1> " << endl;
+  stream1 << "<h2><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\">Matrix portrait:</span></span></strong></h2> " << endl;
+  stream1 <<  "<p><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\"><img src=\"" <<  path_to_picture1 << "\" alt=\"\" /></span></span></strong></p>" << endl;
+  stream1 << "<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p> " << endl;
+  stream1 << "<h2 style=\"color: #2e6c80;\">Matrix details:</h2>" << endl; 
+  stream1 << "<table class=\"editorDemoTable\" style=\"width: 497px; border-style: solid; border-color: blue; float: left; height: 393px;\">" << endl;
+
+  std::vector<std::string> names;
+  names.push_back("Number of rows  ");   names.push_back(to_string(sz_row));
+  names.push_back("Number of columns  "); names.push_back(to_string(sz_col));
+  names.push_back("Int  "); 
+  if(is_init_data)names.push_back("Yes");
+  else names.push_back("No");
+  names.push_back("Symmetrical ");
+  if(is_symmetrical)names.push_back("Yes");
+  else names.push_back("No");
+  names.push_back("MinElement  ");   names.push_back(to_string(MinElement));
+  names.push_back("MaxElement  ");  names.push_back(to_string(MaxElement));
+  names.push_back("MinModElement  ");  names.push_back(to_string(MinModElement));
+  names.push_back("MaxModElement  ");  names.push_back(to_string(MaxModElement));
+  names.push_back("MaxDiag  ");      names.push_back(to_string(MaxDiag));
+  names.push_back("MinDiag  ");     names.push_back(to_string(MinDiag));
+  names.push_back("MaxModDiag  ");  names.push_back(to_string(MaxModDiag));
+  names.push_back("MinModDiag  ");  names.push_back(to_string(MinModDiag));
+
+  for(int i = 0; i < names.size(); i = i +2){
+    stream1 << " <tr style=\"height: 36px;\"> " << endl;
+    stream1 << " <td style=\"width: 207.783px; height: 36px;\"> " << names[i] << "        </td> " << endl;
+    stream1 << " <td style=\"width: 272.517px; height: 36px;\"> " <<  names[i+1] << "</td> </tr> " << endl;
+  }
+  stream1 << "</tbody> </table> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p><p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> " << endl;
+  
+  
+}
+
+
 void MatrixCSR::Clear()
 {
 	delete [] rowA;
@@ -329,4 +370,27 @@ void MatrixCSR::Clear()
 	delete [] csr_ja;
 	delete [] csr_aa;
 	is_init_data = false;
+}
+
+
+int main(){
+
+  MatrixCSR example;
+  example.path_to_matrix = "out";
+  example.path_to_picture1 = "685_bus.png";
+  example.sz_row = 0;
+  example.sz_col = 0;
+  example.is_init_data = 0;
+  example.is_symmetrical = 0;
+  example.MinElement = 0;
+  example.MaxElement = 0;
+  example.MinModElement = 0;
+  example.MaxModElement = 0;
+  example.MaxDiag = 0;
+  example.MinDiag = 0;
+  example.MaxModDiag = 0;
+  example.MinModDiag = 0;
+  example.Create_out_html();
+
+  return 0;
 }
