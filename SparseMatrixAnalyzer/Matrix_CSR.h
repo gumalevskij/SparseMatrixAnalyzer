@@ -8,6 +8,7 @@ struct MatrixCSR
 	int sz_row;
 	int sz_col;
 	int sz_elem;
+	string path_to_matrix;
 
 	//COO
 	int nnz;
@@ -41,6 +42,7 @@ struct MatrixCSR
 	//Graph
 	vector<bool> used;
 	vector<int> comp;
+	string path_to_picture1;
 
 	int ReadMtx();
 	int ReadSortMtx();
