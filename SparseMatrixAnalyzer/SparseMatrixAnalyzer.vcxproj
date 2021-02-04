@@ -140,10 +140,12 @@
   <ItemGroup>
     <ClCompile Include="Matrix_CSR.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="tgaimage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Matrix_CSR.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="tgaimage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

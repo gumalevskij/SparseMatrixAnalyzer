@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "tgaimage.h"
 
 struct MatrixCSR
 {
@@ -64,5 +65,12 @@ struct MatrixCSR
 	int CheckExistenceOfIsolatedSubmatrices();
 	int CalculateParameters();
 	void Create_out_html();
+
+	//portrait
+	const TGAColor white = TGAColor(255, 255, 255, 255);
+	const TGAColor red = TGAColor(255, 0, 0, 255);
+	TGAColor color(double value, double a, double b);
+	void plot(int* ptr, int* y, double* data, int n, double max, double min);
+
 	void Clear();
 };

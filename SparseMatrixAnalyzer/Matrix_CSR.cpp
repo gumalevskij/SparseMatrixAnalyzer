@@ -439,7 +439,10 @@ int MatrixCSR::CalculateParameters()
 
 void MatrixCSR::Create_out_html()
 {
+  plot(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
   char buffer[255];
+  path_to_matrix = "out";
+  path_to_picture1 = "output.tga";
   ofstream stream1((path_to_matrix+".out.html").c_str());
   stream1 << scientific << setprecision(15);
   stream1 << "<h1 style=\"color: #5e9ca0;\">Matrix characteristics for " <<  path_to_matrix << " </h1> " << endl;
@@ -488,6 +491,44 @@ void MatrixCSR::Create_out_html()
   stream1 << "</tbody> </table> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p><p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> " << endl;
   
   
+}
+
+TGAColor MatrixCSR::color(double value, double a, double b) {
+
+	int fun = round(a * value + b);
+	int k = fun / 256;
+	if (k == 0) return  TGAColor(0, (fun % 256), 255, 255);
+	else if (k == 1) return  TGAColor(0, 255, 255 - (fun % 255), 255);
+	else if (k == 2) return  TGAColor(fun % 255, 255, 0, 255);
+	else if (k == 3) return  TGAColor(255, 255 - (fun % 255), 0, 255);
+	else return  TGAColor(255, 0, 0, 255);
+
+}
+
+void MatrixCSR::plot(int* ptr, int* y, double* data, int n, double max, double min) {
+	int size = n;//rowptr.size() - 1;
+	int i = 0;
+	int value = 0;
+	int mod = 1;
+	double a = 1020 / (max - min);
+	double b = -min * a;
+
+	if (size > 1999) {
+		n = 1000;
+		mod = size / 1000;
+	}
+	TGAImage image(n, n, TGAImage::RGB);
+	for (int row = 0; row < size; row++) {
+		for (int k = 0; k < (ptr[row + 1] - ptr[row]); k++) {
+			//cout << row << " " << y[i] << endl;
+			image.set((y[i]) / mod, (size - row - 1) / mod, color(data[value], a, b));
+			value++;
+			i++;
+		}
+
+	}
+	image.flip_vertically();
+	image.write_tga_file("output.tga");
 }
 
 void MatrixCSR::Clear()
