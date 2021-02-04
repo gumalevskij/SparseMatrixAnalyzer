@@ -50,8 +50,8 @@ int MatrixCSR::ReadSortMtx()
 	string line, line2;
 	int nthreads;
 	ofp.open("input.mtx");
-	getline(ofp, line);
-	auto parameters = split(line, ' ');
+	//getline(ofp, line);
+	//auto parameters = split(line, ' ');
 	while(getline(ofp, line2))
 	{
 		if (line2[0] != '%')
@@ -110,56 +110,15 @@ int MatrixCSR::ReadSortMtx()
 	return 0;
 }
 
-int MatrixCSR::CCStoCRS()
+int MatrixCSR::CSRtoCSR_t()
 {
-	csr_aa = new double[sz_elem];
-	csr_ja = new int[sz_elem];
-	csr_ia = new int[sz_row + 1];
-	int* nn = new int[sz_row + 1];
-	for (int i = 0; i <= sz_row; i++)
-	{
-		csr_ia[i] = 0;
-	}
-	int k = 0;
-	int *reverse_col_index = new int[sz_elem]; // each value belongs to which col
-	for (int i = 0; i < sz_col; i++)
-	{
-		for (int j = 0; j < ccs_ja[i + 1] - ccs_ja[i]; j++)
-		{
-			reverse_col_index[k] = i;
-			k++;
-		}
-	}
-
-	for (int i = 0; i < sz_elem; i++)
-	{
-		csr_ia[ccs_ia[i] + 1]++;
-	}
-	for (int i = 1; i <= sz_row; i++)
-	{
-		csr_ia[i] += csr_ia[i - 1];
-	}
-	std::copy(csr_ia, csr_ia + sz_row+1, nn);
-
-	for (int i = 0; i < sz_elem; i++) 
-	{
-		int x = nn[ccs_ia[i]];
-		nn[ccs_ia[i]] += 1;
-		csr_aa[x] = ccs_aa[i];
-		csr_ja[x] = reverse_col_index[i];
-	}
-	return 1;
-}
-
-int MatrixCSR::CRStoCCS()
-{
-	ccs_aa = new double[sz_elem];
-	ccs_ja = new int[sz_col + 1];
-	ccs_ia = new int[sz_elem];
+	csr_t_aa = new double[sz_elem];
+	csr_t_ia = new int[sz_col + 1];
+	csr_t_ja = new int[sz_elem];
 	int* nn = new int[sz_col + 1];
 	for (int i = 0; i <= sz_col; i++)
 	{
-		ccs_ja[i] = 0;
+		csr_t_ia[i] = 0;
 	}
 	int k = 0;
 	int* reverse_row_index = new int[sz_elem]; // each value belongs to which col
@@ -174,25 +133,25 @@ int MatrixCSR::CRStoCCS()
 
 	for (int i = 0; i < sz_elem; i++)
 	{
-		ccs_ja[csr_ja[i] + 1]++;
+		csr_t_ia[csr_ja[i] + 1]++;
 	}
 	for (int i = 1; i <= sz_col; i++)
 	{
-		ccs_ja[i] += ccs_ja[i - 1];
+		csr_t_ia[i] += csr_t_ia[i - 1];
 	}
-	std::copy(ccs_ja, ccs_ja + sz_col + 1, nn);
+	std::copy(csr_t_ia, csr_t_ia + sz_col + 1, nn);
 
 	for (int i = 0; i < sz_elem; i++)
 	{
 		int x = nn[csr_ja[i]];
 		nn[csr_ja[i]] += 1;
-		ccs_aa[x] = csr_aa[i];
-		ccs_ia[x] = reverse_row_index[i];
+		csr_t_aa[x] = csr_aa[i];
+		csr_t_ja[x] = reverse_row_index[i];
 	}
 	return 1;
 }
 
-int MatrixCSR::Write_crs()
+int MatrixCSR::Write_csr()
 {
 	ofstream ofp;
 	ofp.open("ia.txt");
@@ -224,30 +183,30 @@ int MatrixCSR::Write_crs()
 	return 0;
 }
 
-int MatrixCSR::Write_ccs()
+int MatrixCSR::Write_csr_t()
 {
 	ofstream ofp;
-	ofp.open("ccs_ia.txt");
+	ofp.open("ia_t.txt");
 	ofp << scientific << setprecision(15);
-	for (int i = 0; i < sz_elem; i++)
-	{
-		ofp << ccs_ia[i] << endl;
-	}
-	ofp.clear();
-	ofp.close();
-
-	ofp.open("ccs_ja.txt");
 	for (int i = 0; i <= sz_col; i++)
 	{
-		ofp << ccs_ja[i] << endl;
+		ofp << csr_t_ia[i] << endl;
+	}
+	ofp.clear();
+	ofp.close();
+
+	ofp.open("ja_t.txt");
+	for (int i = 0; i < sz_elem; i++)
+	{
+		ofp << csr_t_ja[i] << endl;
 	}
 
 	ofp.clear();
 	ofp.close();
-	ofp.open("ccs_aa.txt");
+	ofp.open("aa_t.txt");
 	for (int i = 0; i < sz_elem; i++)
 	{
-		ofp << ccs_aa[i] << endl;
+		ofp << csr_t_aa[i] << endl;
 	}
 
 	ofp.clear();
@@ -265,34 +224,6 @@ int MatrixCSR::WriteProperties()
 	ofp << currentComp << endl;
 	ofp.clear();
 	ofp.close();
-
-	return 0;
-}
-
-int MatrixCSR::ConvertMatrixMtxToCCS()
-{
-	ccs_ja = new int[sz_col];
-	ccs_ia = new int[sz_elem];
-	ccs_aa = new double[sz_elem];
-
-	for (int i = 0; i < sz_col + 1; i++)
-	{
-		ccs_ja[i] = 0;
-	}
-
-	ccs_ja[0] = 0;
-	int currentRow = 0;
-	for (int i = 0; i < sz_elem; i++)
-	{
-		ccs_aa[i] = valA[i];
-		ccs_ia[i] = rowA[i];
-		ccs_ja[colA[i]+1] += 1;
-	}
-
-	for (int i = 0; i < sz_row; i++)
-	{
-		ccs_ja[i+1] += ccs_ja[i];
-	}
 
 	return 0;
 }

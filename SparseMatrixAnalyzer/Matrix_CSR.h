@@ -21,10 +21,10 @@ struct MatrixCSR
 	int * csr_ja;
 	double * csr_aa;
 
-	//CCS
-	int* ccs_ia;
-	int* ccs_ja;
-	double* ccs_aa;
+	//CSR_T
+	int* csr_t_ia;
+	int* csr_t_ja;
+	double* csr_t_aa;
 
 	//properties
 	bool is_init_data;
@@ -48,12 +48,10 @@ struct MatrixCSR
 
 	int ReadMtx();
 	int ReadSortMtx();
-	int CCStoCRS();
-	int CRStoCCS();
-	int Write_crs();
-	int Write_ccs();
+	int CSRtoCSR_t();
+	int Write_csr();
+	int Write_csr_t();
 	int WriteProperties();
-	int ConvertMatrixMtxToCCS();
 	int ConvertMatrixMtxToCSR();
 	int CheckExistenceOfIsolatedSubmatrices();
 	int CalculateParameters();

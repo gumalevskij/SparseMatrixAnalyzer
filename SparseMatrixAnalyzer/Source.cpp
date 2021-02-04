@@ -6,8 +6,10 @@ int main()
 	MatrixCSR mtxCSR;
 	mtxCSR.ReadSortMtx();
 	mtxCSR.ConvertMatrixMtxToCSR();
+    mtxCSR.CSRtoCSR_t();
 	mtxCSR.CheckExistenceOfIsolatedSubmatrices();
-	mtxCSR.Write_crs();
+	mtxCSR.Write_csr();
+    mtxCSR.Write_csr_t();
     mtxCSR.path_to_matrix = "out";
     mtxCSR.path_to_picture1 = "685_bus.png";
     mtxCSR.sz_row = 0;
