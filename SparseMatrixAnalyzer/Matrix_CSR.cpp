@@ -50,8 +50,8 @@ int MatrixCSR::ReadSortMtx()
 	string line, line2;
 	int nthreads;
 	ofp.open("input.mtx");
-	//getline(ofp, line);
-	//auto parameters = split(line, ' ');
+	getline(ofp, line);
+	auto parameters = split(line, ' ');
 	while(getline(ofp, line2))
 	{
 		if (line2[0] != '%')
@@ -112,6 +112,7 @@ int MatrixCSR::ReadSortMtx()
 
 int MatrixCSR::CSRtoCSR_t()
 {
+	csr_t_exist = true;
 	csr_t_aa = new double[sz_elem];
 	csr_t_ia = new int[sz_col + 1];
 	csr_t_ja = new int[sz_elem];
@@ -215,19 +216,6 @@ int MatrixCSR::Write_csr_t()
 	return 0;
 }
 
-int MatrixCSR::WriteProperties()
-{
-	ofstream ofp;
-	ofp.open("prop.txt");
-	ofp << scientific << setprecision(15);
-	ofp << ExistenceOfIsolatedSubmatrices << endl;
-	ofp << currentComp << endl;
-	ofp.clear();
-	ofp.close();
-
-	return 0;
-}
-
 int MatrixCSR::ConvertMatrixMtxToCSR()
 {
 	csr_ia = new int[sz_row + 1];
@@ -265,7 +253,7 @@ int MatrixCSR::CheckExistenceOfIsolatedSubmatrices()
 		used[i] = false;
 	}
 
-	currentComp = 0;
+	countComponents = 0;
 	int currentStack = -1;
 	int currentEl = -1;
 	for (int i = 0; i < sz_row; i++)
@@ -290,11 +278,11 @@ int MatrixCSR::CheckExistenceOfIsolatedSubmatrices()
 					}
 				}
 			}
-			currentComp++;
+			countComponents++;
 		}
 	}
 
-	if (currentComp == 1)
+	if (countComponents == 1)
 	{
 		ExistenceOfIsolatedSubmatrices = true;
 	}
@@ -304,34 +292,193 @@ int MatrixCSR::CheckExistenceOfIsolatedSubmatrices()
 	return 0;
 }
 
+int MatrixCSR::CalculateParameters()
+{
+	CheckExistenceOfIsolatedSubmatrices();
+	double MinRow;
+	double MaxRow;
+	double MinModRow;
+	double MaxModRow;
+	MinRows = new double[sz_row];
+	MaxRows = new double[sz_row];
+	MinModRows = new double[sz_row];
+	MaxModRows = new double[sz_row];
+
+	MinElement = DBL_MAX;
+	MaxElement = -DBL_MAX;
+	MinModElement = DBL_MAX;
+	MaxModElement = -DBL_MAX;
+	MinDiag = DBL_MAX;
+	MaxDiag = -DBL_MAX;
+	MinModDiag = DBL_MAX;
+	MaxModDiag = -DBL_MAX;
+
+	if (sz_row != sz_col)
+	{
+		is_symmetrical = false;
+		is_structural_symmetrical = false;
+	}
+
+	for (int i = 0; i < sz_row; i++)
+	{
+		MinRow = DBL_MAX;;
+		MaxRow = -DBL_MAX;
+		MinModRow = DBL_MAX;
+		MaxModRow = -DBL_MAX;
+
+		if (csr_ia[i + 1] != csr_t_ia[i + 1])
+		{
+			is_symmetrical = false;
+			is_structural_symmetrical = false;
+		}
+
+		for (int j = csr_ia[i]; j < csr_ia[i + 1]; j++)
+		{
+			double val = csr_aa[j];
+			double modVal = fabs(csr_aa[j]);
+
+			if (val != 0)
+			{
+				Nonzeros++;
+
+				if (val < MinRow)
+				{
+					MinRow = val;
+					if (val < MinElement)
+					{
+						MinElement = val;
+					}
+				}
+				else
+				{
+					if (val > MaxRow)
+					{
+						MaxRow = val;
+
+						if (val > MaxElement)
+						{
+							MaxElement = val;
+						}
+					}
+				}
+
+				if (modVal < MinModRow)
+				{
+					MinModRow = modVal;
+
+					if (modVal < MinModElement)
+					{
+						MinModElement = modVal;
+					}
+				}
+				else
+				{
+					if (modVal > MaxModRow)
+					{
+						MaxModRow = modVal;
+
+						if (modVal > MaxModElement)
+						{
+							MaxModElement = modVal;
+						}
+					}
+				}
+
+				if (i == csr_ja[j])
+				{
+					if (val < MinDiag)
+					{
+						MinDiag = val;
+					}
+					else
+					{
+						if (val > MaxDiag)
+						{
+							MaxDiag = val;
+						}
+					}
+
+					if (modVal < MinModDiag)
+					{
+						MinModDiag = modVal;
+					}
+					else
+					{
+						if (modVal > MaxModDiag)
+						{
+							MaxModDiag = modVal;
+						}
+					}
+				}
+
+				
+			}
+
+			if (csr_ja[j] != csr_t_ja[j])
+			{
+				is_symmetrical = false;
+				is_structural_symmetrical = false;
+			}
+			else
+			{
+				if (csr_aa[j] != csr_t_aa[j])
+				{
+					is_structural_symmetrical = false;
+				}
+			}
+		}
+
+		MinRows[i] = MinRow;
+		MaxRows[i] = MaxRow;
+		MinModRows[i] = MinModRow;
+		MaxModRows[i] = MaxModRow;
+	}
+	 
+	return 0;
+}
+
 void MatrixCSR::Create_out_html()
 {
-  
+  char buffer[255];
   ofstream stream1((path_to_matrix+".out.html").c_str());
+  stream1 << scientific << setprecision(15);
   stream1 << "<h1 style=\"color: #5e9ca0;\">Matrix characteristics for " <<  path_to_matrix << " </h1> " << endl;
   stream1 << "<h2><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\">Matrix portrait:</span></span></strong></h2> " << endl;
   stream1 <<  "<p><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\"><img src=\"" <<  path_to_picture1 << "\" alt=\"\" /></span></span></strong></p>" << endl;
   stream1 << "<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p> " << endl;
-  stream1 << "<h2 style=\"color: #2e6c80;\">Matrix details:</h2>" << endl; 
+  stream1 << "<h2 style=\"color: #2e6c80;\">Matrix details:</h2>" << endl;
   stream1 << "<table class=\"editorDemoTable\" style=\"width: 497px; border-style: solid; border-color: blue; float: left; height: 393px;\">" << endl;
 
   std::vector<std::string> names;
   names.push_back("Number of rows  ");   names.push_back(to_string(sz_row));
   names.push_back("Number of columns  "); names.push_back(to_string(sz_col));
-  names.push_back("Int  "); 
-  if(is_init_data)names.push_back("Yes");
+  names.push_back("Nonzeros   ");   names.push_back(to_string(Nonzeros));
+  names.push_back("Pattern Entries  "); names.push_back(to_string(sz_elem));
+  names.push_back("Symmetrical structural");
+  if (is_structural_symmetrical)names.push_back("Yes");
   else names.push_back("No");
-  names.push_back("Symmetrical ");
+
+  names.push_back("Symmetrical values");
   if(is_symmetrical)names.push_back("Yes");
   else names.push_back("No");
-  names.push_back("MinElement  ");   names.push_back(to_string(MinElement));
-  names.push_back("MaxElement  ");  names.push_back(to_string(MaxElement));
-  names.push_back("MinModElement  ");  names.push_back(to_string(MinModElement));
-  names.push_back("MaxModElement  ");  names.push_back(to_string(MaxModElement));
-  names.push_back("MaxDiag  ");      names.push_back(to_string(MaxDiag));
-  names.push_back("MinDiag  ");     names.push_back(to_string(MinDiag));
-  names.push_back("MaxModDiag  ");  names.push_back(to_string(MaxModDiag));
-  names.push_back("MinModDiag  ");  names.push_back(to_string(MinModDiag));
+  
+  sprintf_s(buffer, "%.7e", MinElement);
+  names.push_back("MinElement  ");   names.push_back(buffer);
+  sprintf_s(buffer, "%.7e", MaxElement);
+  names.push_back("MaxElement  ");  names.push_back(buffer);
+  sprintf_s(buffer, "%.7e", MinModElement);
+  names.push_back("MinModElement  ");  names.push_back(buffer);
+  sprintf_s(buffer, "%.7e", MaxModElement);
+  names.push_back("MaxModElement  ");  names.push_back(buffer);
+  sprintf_s(buffer, "%.7e", MaxDiag);
+  names.push_back("MaxDiag  ");      names.push_back(buffer);
+  sprintf_s(buffer, "%.7e", MinDiag);
+  names.push_back("MinDiag  ");     names.push_back(buffer);
+  sprintf_s(buffer, "%.7e", MaxModDiag);
+  names.push_back("MaxModDiag  ");  names.push_back(buffer);
+  sprintf_s(buffer, "%.7e", MinModDiag);
+  names.push_back("MinModDiag  ");  names.push_back(buffer);
+  names.push_back("Number of connected components in the resulting graph of this matrix  ");  names.push_back(to_string(countComponents));
 
   for(int i = 0; i < names.size(); i = i +2){
     stream1 << " <tr style=\"height: 36px;\"> " << endl;
@@ -351,5 +498,9 @@ void MatrixCSR::Clear()
 	delete [] csr_ia;
 	delete [] csr_ja;
 	delete [] csr_aa;
+	delete[] MinRows;
+	delete[] MaxRows;
+	delete[] MinModRows;
+	delete[] MaxModRows;
 	is_init_data = false;
 }

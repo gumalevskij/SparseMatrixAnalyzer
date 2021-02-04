@@ -22,13 +22,16 @@ struct MatrixCSR
 	double * csr_aa;
 
 	//CSR_T
+	bool csr_t_exist = false;
 	int* csr_t_ia;
 	int* csr_t_ja;
 	double* csr_t_aa;
 
 	//properties
+	int Nonzeros = 0;
 	bool is_init_data;
-	bool is_symmetrical;
+	bool is_symmetrical = true;
+	bool is_structural_symmetrical = true;
 	double MinElement;
 	double MaxElement;
 	double MinModElement;
@@ -37,8 +40,14 @@ struct MatrixCSR
 	double MinDiag;
 	double MaxModDiag;
 	double MinModDiag;
+	double *MinRows;
+	double *MaxRows;
+	double *MinModRows;
+	double *MaxModRows;
+	bool DiagonallyDominantMatrix = true;
+	bool DiagonalSignDefinite = true;
 	bool ExistenceOfIsolatedSubmatrices = false;
-	int currentComp;
+	int countComponents;
 
 
 	//Graph
@@ -51,7 +60,6 @@ struct MatrixCSR
 	int CSRtoCSR_t();
 	int Write_csr();
 	int Write_csr_t();
-	int WriteProperties();
 	int ConvertMatrixMtxToCSR();
 	int CheckExistenceOfIsolatedSubmatrices();
 	int CalculateParameters();
