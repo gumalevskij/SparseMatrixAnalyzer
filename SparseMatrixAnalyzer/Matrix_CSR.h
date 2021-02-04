@@ -37,12 +37,14 @@ struct MatrixCSR
 	double MinDiag;
 	double MaxModDiag;
 	double MinModDiag;
+	bool ExistenceOfIsolatedSubmatrices = false;
+	int currentComp;
 
 
 	//Graph
-	vector<bool> used;
-	vector<int> comp;
 	string path_to_picture1;
+	bool *used;
+	int *stack;
 
 	int ReadMtx();
 	int ReadSortMtx();
@@ -50,8 +52,11 @@ struct MatrixCSR
 	int CRStoCCS();
 	int Write_crs();
 	int Write_ccs();
+	int WriteProperties();
 	int ConvertMatrixMtxToCCS();
 	int ConvertMatrixMtxToCSR();
-	int CalculateProperties();
+	int CheckExistenceOfIsolatedSubmatrices();
+	int CalculateParameters();
+	void Create_out_html();
 	void Clear();
 };

@@ -256,6 +256,19 @@ int MatrixCSR::Write_ccs()
 	return 0;
 }
 
+int MatrixCSR::WriteProperties()
+{
+	ofstream ofp;
+	ofp.open("prop.txt");
+	ofp << scientific << setprecision(15);
+	ofp << ExistenceOfIsolatedSubmatrices << endl;
+	ofp << currentComp << endl;
+	ofp.clear();
+	ofp.close();
+
+	return 0;
+}
+
 int MatrixCSR::ConvertMatrixMtxToCCS()
 {
 	ccs_ja = new int[sz_col];
@@ -311,13 +324,52 @@ int MatrixCSR::ConvertMatrixMtxToCSR()
 	return 0;
 }
 
-int MatrixCSR::CalculateProperties()
+int MatrixCSR::CheckExistenceOfIsolatedSubmatrices()
 {
-	for (int i = 0; i < sz_row; i++)
-	{
+	used = new bool[sz_elem];
+	stack = new int[sz_elem];
 
+	for (int i = 0; i < sz_elem; i++)
+	{
+		used[i] = false;
 	}
 
+	currentComp = 0;
+	int currentStack = -1;
+	int currentEl = -1;
+	for (int i = 0; i < sz_row; i++)
+	{
+		if (!used[i])
+		{
+			currentStack++;
+			stack[currentStack] = i;
+			used[i] = true;
+
+			while (currentStack != -1)
+			{
+				currentEl = stack[currentStack];
+				currentStack--;
+				for (int j = csr_ia[currentEl]; j < csr_ia[currentEl + 1]; j++)
+				{
+					if (!used[csr_ja[j]])
+					{
+						used[csr_ja[j]] = true;
+						currentStack++;
+						stack[currentStack] = csr_ja[j];
+					}
+				}
+			}
+			currentComp++;
+		}
+	}
+
+	if (currentComp == 1)
+	{
+		ExistenceOfIsolatedSubmatrices = true;
+	}
+
+	delete[] used;
+	delete[] stack;
 	return 0;
 }
 
@@ -360,7 +412,6 @@ void MatrixCSR::Create_out_html()
   
 }
 
-
 void MatrixCSR::Clear()
 {
 	delete [] rowA;
@@ -370,27 +421,4 @@ void MatrixCSR::Clear()
 	delete [] csr_ja;
 	delete [] csr_aa;
 	is_init_data = false;
-}
-
-
-int main(){
-
-  MatrixCSR example;
-  example.path_to_matrix = "out";
-  example.path_to_picture1 = "685_bus.png";
-  example.sz_row = 0;
-  example.sz_col = 0;
-  example.is_init_data = 0;
-  example.is_symmetrical = 0;
-  example.MinElement = 0;
-  example.MaxElement = 0;
-  example.MinModElement = 0;
-  example.MaxModElement = 0;
-  example.MaxDiag = 0;
-  example.MinDiag = 0;
-  example.MaxModDiag = 0;
-  example.MinModDiag = 0;
-  example.Create_out_html();
-
-  return 0;
 }

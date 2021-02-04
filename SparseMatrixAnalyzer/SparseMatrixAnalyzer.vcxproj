@@ -138,15 +138,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Matrix_CSR.cpp" />
-    <ClCompile Include="mmio.c" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Graph.h" />
     <ClInclude Include="Matrix_CSR.h" />
-    <ClInclude Include="mmio.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

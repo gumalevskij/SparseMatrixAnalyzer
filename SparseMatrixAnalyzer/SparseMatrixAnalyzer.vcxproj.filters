@@ -21,24 +21,12 @@
     <ClCompile Include="Matrix_CSR.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Graph.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="mmio.c">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Matrix_CSR.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Graph.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="mmio.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
