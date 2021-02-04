@@ -255,6 +255,19 @@ int MatrixCSR::Write_ccs()
 	return 0;
 }
 
+int MatrixCSR::WriteProperties()
+{
+	ofstream ofp;
+	ofp.open("prop.txt");
+	ofp << scientific << setprecision(15);
+	ofp << ExistenceOfIsolatedSubmatrices << endl;
+	ofp << currentComp << endl;
+	ofp.clear();
+	ofp.close();
+
+	return 0;
+}
+
 int MatrixCSR::ConvertMatrixMtxToCCS()
 {
 	ccs_ja = new int[sz_col];
@@ -310,13 +323,52 @@ int MatrixCSR::ConvertMatrixMtxToCSR()
 	return 0;
 }
 
-int MatrixCSR::CalculateProperties()
+int MatrixCSR::CheckExistenceOfIsolatedSubmatrices()
 {
-	for (int i = 0; i < sz_row; i++)
-	{
+	used = new bool[sz_elem];
+	stack = new int[sz_elem];
 
+	for (int i = 0; i < sz_elem; i++)
+	{
+		used[i] = false;
 	}
 
+	currentComp = 0;
+	int currentStack = -1;
+	int currentEl = -1;
+	for (int i = 0; i < sz_row; i++)
+	{
+		if (!used[i])
+		{
+			currentStack++;
+			stack[currentStack] = i;
+			used[i] = true;
+
+			while (currentStack != -1)
+			{
+				currentEl = stack[currentStack];
+				currentStack--;
+				for (int j = csr_ia[currentEl]; j < csr_ia[currentEl + 1]; j++)
+				{
+					if (!used[csr_ja[j]])
+					{
+						used[csr_ja[j]] = true;
+						currentStack++;
+						stack[currentStack] = csr_ja[j];
+					}
+				}
+			}
+			currentComp++;
+		}
+	}
+
+	if (currentComp == 1)
+	{
+		ExistenceOfIsolatedSubmatrices = true;
+	}
+
+	delete[] used;
+	delete[] stack;
 	return 0;
 }
 
