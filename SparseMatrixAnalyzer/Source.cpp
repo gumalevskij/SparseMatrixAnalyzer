@@ -14,4 +14,3 @@ int main()
 	mtxCSR.Clear();
 	return 1;
 }
-

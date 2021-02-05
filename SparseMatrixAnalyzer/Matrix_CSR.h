@@ -49,6 +49,9 @@ struct MatrixCSR
 	bool DiagonalSignDefinite = true;
 	bool ExistenceOfIsolatedSubmatrices = false;
 	int countComponents;
+	int countUpElements;
+	int countDownElements;
+	int countDiag;
 
 
 	//Graph

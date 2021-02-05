@@ -312,6 +312,9 @@ int MatrixCSR::CalculateParameters()
 	MaxDiag = -DBL_MAX;
 	MinModDiag = DBL_MAX;
 	MaxModDiag = -DBL_MAX;
+	countUpElements = 0;
+	countDownElements = 0;
+	countDiag = 0;
 
 	if (sz_row != sz_col)
 	{
@@ -325,6 +328,8 @@ int MatrixCSR::CalculateParameters()
 		MaxRow = -DBL_MAX;
 		MinModRow = DBL_MAX;
 		MaxModRow = -DBL_MAX;
+		double AbsDiag = 0;
+		double SumAbsRows = 0;
 
 		if (csr_ia[i + 1] != csr_t_ia[i + 1])
 		{
@@ -337,6 +342,23 @@ int MatrixCSR::CalculateParameters()
 			double val = csr_aa[j];
 			double modVal = fabs(csr_aa[j]);
 
+			if (i == csr_ja[j])
+			{
+				countDiag++;
+				AbsDiag = modVal;
+			}
+			else
+			{
+				SumAbsRows += modVal;
+				if (i < csr_ja[j])
+				{
+					countUpElements++;
+				}
+				else
+				{
+					countDownElements++;
+				}
+			}
 			if (val != 0)
 			{
 				Nonzeros++;
@@ -428,6 +450,11 @@ int MatrixCSR::CalculateParameters()
 			}
 		}
 
+		if ((AbsDiag == 0 && SumAbsRows > 0) || AbsDiag < SumAbsRows)
+		{
+			DiagonallyDominantMatrix = false;
+		}
+
 		MinRows[i] = MinRow;
 		MaxRows[i] = MaxRow;
 		MinModRows[i] = MinModRow;
@@ -439,58 +466,91 @@ int MatrixCSR::CalculateParameters()
 
 void MatrixCSR::Create_out_html()
 {
-  plot(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
-  char buffer[255];
-  path_to_matrix = "out";
-  path_to_picture1 = "output.tga";
-  ofstream stream1((path_to_matrix+".out.html").c_str());
-  stream1 << scientific << setprecision(15);
-  stream1 << "<h1 style=\"color: #5e9ca0;\">Matrix characteristics for " <<  path_to_matrix << " </h1> " << endl;
-  stream1 << "<h2><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\">Matrix portrait:</span></span></strong></h2> " << endl;
-  stream1 <<  "<p><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\"><img src=\"" <<  path_to_picture1 << "\" alt=\"\" /></span></span></strong></p>" << endl;
-  stream1 << "<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p> " << endl;
-  stream1 << "<h2 style=\"color: #2e6c80;\">Matrix details:</h2>" << endl;
-  stream1 << "<table class=\"editorDemoTable\" style=\"width: 497px; border-style: solid; border-color: blue; float: left; height: 393px;\">" << endl;
+	plot(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
+	char buffer[255];
+	path_to_matrix = "out";
+	path_to_picture1 = "output.tga";
+	ofstream stream1((path_to_matrix+".out.html").c_str());
+	stream1 << scientific << setprecision(15);
+	stream1 << "<h1 style=\"color: #5e9ca0;\">Matrix characteristics for " <<  path_to_matrix << " </h1> " << endl;
+	stream1 << "<h2><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\">Matrix portrait:</span></span></strong></h2> " << endl;
+	stream1 <<  "<p><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\"><img src=\"" <<  path_to_picture1 << "\" alt=\"\" /></span></span></strong></p>" << endl;
+	stream1 << "<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p> " << endl;
+	stream1 << "<h2 style=\"color: #2e6c80;\">Matrix details:</h2>" << endl;
+	stream1 << "<table class=\"editorDemoTable\" style=\"width: 497px; border-style: solid; border-color: blue; float: left; height: 393px;\">" << endl;
 
-  std::vector<std::string> names;
-  names.push_back("Number of rows  ");   names.push_back(to_string(sz_row));
-  names.push_back("Number of columns  "); names.push_back(to_string(sz_col));
-  names.push_back("Nonzeros   ");   names.push_back(to_string(Nonzeros));
-  names.push_back("Pattern Entries  "); names.push_back(to_string(sz_elem));
-  names.push_back("Symmetrical structural");
-  if (is_structural_symmetrical)names.push_back("Yes");
-  else names.push_back("No");
+	std::vector<std::string> names;
+	int namesSize = 0;
+	names.push_back("Num Rows  ");   names.push_back(to_string(sz_row));
+	names.push_back("Num Cols  "); names.push_back(to_string(sz_col));
+	names.push_back("Nonzeros   ");   names.push_back(to_string(Nonzeros));
+	names.push_back("Pattern Entries  "); names.push_back(to_string(sz_elem));
+	names.push_back("Pattern Symmetry");
+	if (is_structural_symmetrical)names.push_back("Yes");
+	else names.push_back("No");
 
-  names.push_back("Symmetrical values");
-  if(is_symmetrical)names.push_back("Yes");
-  else names.push_back("No");
-  
-  sprintf_s(buffer, "%.7e", MinElement);
-  names.push_back("MinElement  ");   names.push_back(buffer);
-  sprintf_s(buffer, "%.7e", MaxElement);
-  names.push_back("MaxElement  ");  names.push_back(buffer);
-  sprintf_s(buffer, "%.7e", MinModElement);
-  names.push_back("MinModElement  ");  names.push_back(buffer);
-  sprintf_s(buffer, "%.7e", MaxModElement);
-  names.push_back("MaxModElement  ");  names.push_back(buffer);
-  sprintf_s(buffer, "%.7e", MaxDiag);
-  names.push_back("MaxDiag  ");      names.push_back(buffer);
-  sprintf_s(buffer, "%.7e", MinDiag);
-  names.push_back("MinDiag  ");     names.push_back(buffer);
-  sprintf_s(buffer, "%.7e", MaxModDiag);
-  names.push_back("MaxModDiag  ");  names.push_back(buffer);
-  sprintf_s(buffer, "%.7e", MinModDiag);
-  names.push_back("MinModDiag  ");  names.push_back(buffer);
-  names.push_back("Number of connected components in the resulting graph of this matrix  ");  names.push_back(to_string(countComponents));
+	names.push_back("Numeric Symmetry");
+	if(is_symmetrical)names.push_back("Yes");
+	else names.push_back("No");
 
-  for(int i = 0; i < names.size(); i = i +2){
-    stream1 << " <tr style=\"height: 36px;\"> " << endl;
-    stream1 << " <td style=\"width: 207.783px; height: 36px;\"> " << names[i] << "        </td> " << endl;
-    stream1 << " <td style=\"width: 272.517px; height: 36px;\"> " <<  names[i+1] << "</td> </tr> " << endl;
-  }
-  stream1 << "</tbody> </table> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p><p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> " << endl;
-  
-  
+	names.push_back("Diagonally Dominant");
+	if (DiagonallyDominantMatrix) names.push_back("Yes");
+	else names.push_back("No");
+
+	names.push_back("Num Components  ");  names.push_back(to_string(countComponents));
+	names.push_back("Num Upper triangular  ");  names.push_back(to_string(countUpElements));
+	names.push_back("Num Lower triangular  ");  names.push_back(to_string(countDownElements));
+	names.push_back("Num Diag  ");  names.push_back(to_string(countDiag));
+	namesSize = names.size();
+	for (int i = 0; i < names.size(); i = i + 2)
+	{
+		stream1 << " <tr style=\"height: 36px;\"> " << endl;
+		stream1 << " <td style=\"width: 207.783px; height: 36px;\"> " << names[i] << "        </td> " << endl;
+		stream1 << " <td style=\"width: 272.517px; height: 36px;\"> " << names[i + 1] << "</td> </tr> " << endl;
+	}
+
+	/*sprintf_s(buffer, "%.3e", MinElement);
+	names.push_back("Min Value  ");   names.push_back(buffer);
+	sprintf_s(buffer, "%.3e", MaxElement);
+	names.push_back("Max Value  ");  names.push_back(buffer);
+	sprintf_s(buffer, "%.3e", MinModElement);
+	names.push_back("Min Abs Value  ");  names.push_back(buffer);
+	sprintf_s(buffer, "%.3e", MaxModElement);
+	names.push_back("Max Abs Value  ");  names.push_back(buffer);
+	sprintf_s(buffer, "%.3e", MaxDiag);
+	names.push_back("Max Diag  ");      names.push_back(buffer);
+	sprintf_s(buffer, "%.3e", MinDiag);
+	names.push_back("Min Diag  ");     names.push_back(buffer);
+	sprintf_s(buffer, "%.3e", MaxModDiag);
+	names.push_back("Max Mod Diag  ");  names.push_back(buffer);
+	sprintf_s(buffer, "%.3e", MinModDiag);
+	names.push_back("Min Mod Diag  ");  names.push_back(buffer);*/
+
+	sprintf_s(buffer, "%.2e", MinElement);
+	names.push_back("Min/Max Value  ");   names.push_back(buffer);
+	sprintf_s(buffer, "%.2e", MaxElement);
+	names.push_back(buffer);
+	sprintf_s(buffer, "%.2e", MinModElement);
+	names.push_back("Min/Max Abs Value  ");  names.push_back(buffer);
+	sprintf_s(buffer, "%.2e", MaxModElement);
+    names.push_back(buffer);
+	sprintf_s(buffer, "%.2e", MinDiag);
+	names.push_back("Min/Max Diag  ");     names.push_back(buffer);
+	sprintf_s(buffer, "%.2e", MaxDiag);
+	names.push_back(buffer);
+	
+	sprintf_s(buffer, "%.2e", MinModDiag);
+	names.push_back("Min/Max Abs Diag  ");  names.push_back(buffer);
+	sprintf_s(buffer, "%.2e", MaxModDiag);
+	names.push_back(buffer);
+	
+	for(int i = namesSize; i < names.size(); i = i + 3)
+	{
+		stream1 << " <tr style=\"height: 36px;\"> " << endl;
+		stream1 << " <td style=\"width: 207.783px; height: 36px;\"> " << names[i] << "        </td> " << endl;
+		stream1 << " <td style=\"width: 272.517px; height: 36px;\"> " <<  names[i+1] <<" / "<< names[i + 2] << "</td> </tr> " << endl;
+	}
+	stream1 << "</tbody> </table> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p><p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> " << endl;
 }
 
 TGAColor MatrixCSR::color(double value, double a, double b) {
@@ -502,7 +562,6 @@ TGAColor MatrixCSR::color(double value, double a, double b) {
 	else if (k == 2) return  TGAColor(fun % 255, 255, 0, 255);
 	else if (k == 3) return  TGAColor(255, 255 - (fun % 255), 0, 255);
 	else return  TGAColor(255, 0, 0, 255);
-
 }
 
 void MatrixCSR::plot(int* ptr, int* y, double* data, int n, double max, double min) {
