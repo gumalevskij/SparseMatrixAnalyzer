@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "tgaimage.h"
+#include "lodepng.h"
 
 struct MatrixCSR
 {
@@ -74,6 +75,10 @@ struct MatrixCSR
 	const TGAColor red = TGAColor(255, 0, 0, 255);
 	TGAColor color(double value, double a, double b);
 	void plot(int* ptr, int* y, double* data, int n, double max, double min);
+	void plot2(/*int* ptr, int* y, double* data, int n, double max, double min*/);
+	/*int* read_png(const string path, uint& width, uint& height);
+	void write_png(const string path, const uint width, const uint height, const int* const data);*/
+	void encodeTwoSteps(const char* filename, const unsigned char* image, unsigned width, unsigned height);
 
 	void Clear();
 };

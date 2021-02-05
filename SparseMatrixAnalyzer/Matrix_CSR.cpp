@@ -466,10 +466,12 @@ int MatrixCSR::CalculateParameters()
 
 void MatrixCSR::Create_out_html()
 {
-	plot(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
-	char buffer[255];
 	path_to_matrix = "out";
-	path_to_picture1 = "output.tga";
+	path_to_picture1 = "portrait.png";
+	plot(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
+	plot2();
+	char buffer[255];
+	
 	ofstream stream1((path_to_matrix+".out.html").c_str());
 	stream1 << scientific << setprecision(15);
 	stream1 << "<h1 style=\"color: #5e9ca0;\">Matrix characteristics for " <<  path_to_matrix << " </h1> " << endl;
@@ -502,29 +504,13 @@ void MatrixCSR::Create_out_html()
 	names.push_back("Num Lower triangular  ");  names.push_back(to_string(countDownElements));
 	names.push_back("Num Diag  ");  names.push_back(to_string(countDiag));
 	namesSize = names.size();
+
 	for (int i = 0; i < names.size(); i = i + 2)
 	{
 		stream1 << " <tr style=\"height: 36px;\"> " << endl;
 		stream1 << " <td style=\"width: 207.783px; height: 36px;\"> " << names[i] << "        </td> " << endl;
 		stream1 << " <td style=\"width: 272.517px; height: 36px;\"> " << names[i + 1] << "</td> </tr> " << endl;
 	}
-
-	/*sprintf_s(buffer, "%.3e", MinElement);
-	names.push_back("Min Value  ");   names.push_back(buffer);
-	sprintf_s(buffer, "%.3e", MaxElement);
-	names.push_back("Max Value  ");  names.push_back(buffer);
-	sprintf_s(buffer, "%.3e", MinModElement);
-	names.push_back("Min Abs Value  ");  names.push_back(buffer);
-	sprintf_s(buffer, "%.3e", MaxModElement);
-	names.push_back("Max Abs Value  ");  names.push_back(buffer);
-	sprintf_s(buffer, "%.3e", MaxDiag);
-	names.push_back("Max Diag  ");      names.push_back(buffer);
-	sprintf_s(buffer, "%.3e", MinDiag);
-	names.push_back("Min Diag  ");     names.push_back(buffer);
-	sprintf_s(buffer, "%.3e", MaxModDiag);
-	names.push_back("Max Mod Diag  ");  names.push_back(buffer);
-	sprintf_s(buffer, "%.3e", MinModDiag);
-	names.push_back("Min Mod Diag  ");  names.push_back(buffer);*/
 
 	sprintf_s(buffer, "%.2e", MinElement);
 	names.push_back("Min/Max Value  ");   names.push_back(buffer);
@@ -553,8 +539,8 @@ void MatrixCSR::Create_out_html()
 	stream1 << "</tbody> </table> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p><p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> " << endl;
 }
 
-TGAColor MatrixCSR::color(double value, double a, double b) {
-
+TGAColor MatrixCSR::color(double value, double a, double b) 
+{
 	int fun = round(a * value + b);
 	int k = fun / 256;
 	if (k == 0) return  TGAColor(0, (fun % 256), 255, 255);
@@ -588,6 +574,41 @@ void MatrixCSR::plot(int* ptr, int* y, double* data, int n, double max, double m
 	}
 	image.flip_vertically();
 	image.write_tga_file("output.tga");
+}
+
+typedef unsigned int uint;
+
+void MatrixCSR::plot2(/*int* ptr, int* y, double* data, int n, double max, double min*/) 
+{
+	const char* filename = "portrait.png";
+	unsigned width = 512, height = 512;
+	unsigned char* image = new unsigned char[width * height * 4];
+	unsigned x, y;
+	for (y = 0; y < height; y++)
+		for (x = 0; x < width; x++) 
+		{
+			image[4 * width * y + 4 * x + 0] = 255 * !(x & y);
+			image[4 * width * y + 4 * x + 1] = x ^ y;
+			image[4 * width * y + 4 * x + 2] = x | y;
+			image[4 * width * y + 4 * x + 3] = 255;
+		}
+
+	encodeTwoSteps(filename, image,width, height);
+	delete[] image;
+}
+
+void MatrixCSR::encodeTwoSteps(const char* filename, const unsigned char* image, unsigned width, unsigned height) 
+{
+	unsigned char* png;
+	size_t pngsize;
+
+	unsigned error = lodepng_encode32(&png, &pngsize, image, width, height);
+	if (!error) lodepng_save_file(png, pngsize, filename);
+
+	/*if there's an error, display it*/
+	if (error) printf("error %u: %s\n", error, lodepng_error_text(error));
+
+	free(png);
 }
 
 void MatrixCSR::Clear()
