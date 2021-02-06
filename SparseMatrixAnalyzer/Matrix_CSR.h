@@ -1,8 +1,13 @@
 #pragma once
-
+#include <chrono>
+#include <map>
+#include <sstream>
+#include <string>
+#include <algorithm>;
 #include "stdafx.h"
 #include "tgaimage.h"
 #include "lodepng.h"
+
 
 struct MatrixCSR
 {
@@ -54,11 +59,19 @@ struct MatrixCSR
 	int countDownElements;
 	int countDiag;
 
-
 	//Graph
 	string path_to_picture1;
 	bool *used;
 	int *stack;
+
+	//Logger
+	double TimeRead;
+	double TimeConvertation;
+	double TimeTransportation;
+	double TimeWrite;
+	double TimeCalculation;
+	void Create_log();
+	//
 
 	int ReadMtx();
 	int ReadSortMtx();
@@ -75,9 +88,7 @@ struct MatrixCSR
 	const TGAColor red = TGAColor(255, 0, 0, 255);
 	TGAColor color(double value, double a, double b);
 	void plot(int* ptr, int* y, double* data, int n, double max, double min);
-	void plot2(/*int* ptr, int* y, double* data, int n, double max, double min*/);
-	/*int* read_png(const string path, uint& width, uint& height);
-	void write_png(const string path, const uint width, const uint height, const int* const data);*/
+	void plot2(int* ptr, int* y, double* data, int n, double max, double min);
 	void encodeTwoSteps(const char* filename, const unsigned char* image, unsigned width, unsigned height);
 
 	void Clear();

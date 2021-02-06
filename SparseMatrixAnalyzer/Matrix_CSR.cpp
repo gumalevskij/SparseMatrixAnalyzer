@@ -1,9 +1,20 @@
 #include "Matrix_CSR.h"
-#include <map>
-#include <sstream>
-#include <string>
 
 using namespace std;
+
+void MatrixCSR::Create_log()
+{
+	ofstream ofp;
+	ofp.open("Log.txt");
+	ofp << "Time of Read  " << TimeRead << endl;
+	ofp << "Time of Convertation " << TimeConvertation << endl;
+	ofp << "Time of Transportation " << TimeTransportation << endl;
+	ofp << "Time of Calculation " << TimeCalculation << endl;
+	ofp << "Time of Write " << TimeWrite << endl;
+	
+	ofp.clear();
+	ofp.close();
+}
 
 int MatrixCSR::ReadMtx()
 {
@@ -469,14 +480,14 @@ void MatrixCSR::Create_out_html()
 	path_to_matrix = "out";
 	path_to_picture1 = "portrait.png";
 	plot(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
-	plot2();
+	plot2(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
 	char buffer[255];
 	
 	ofstream stream1((path_to_matrix+".out.html").c_str());
 	stream1 << scientific << setprecision(15);
 	stream1 << "<h1 style=\"color: #5e9ca0;\">Matrix characteristics for " <<  path_to_matrix << " </h1> " << endl;
 	stream1 << "<h2><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\">Matrix portrait:</span></span></strong></h2> " << endl;
-	stream1 <<  "<p><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\"><img src=\"" <<  path_to_picture1 << "\" alt=\"\" /></span></span></strong></p>" << endl;
+	stream1 <<  "<p><strong><span class=\"VIiyi\" lang=\"en\"><span class=\"JLqJ4b ChMk0b\" data-language-for-alternatives=\"en\" data-language-to-translate-into=\"ru\" data-phrase-index=\"0\"><img src=\"" <<  path_to_picture1 << "\" width=\"400\" height=\"400\" alt=\"\" /></span></span></strong></p>" << endl;
 	stream1 << "<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p> " << endl;
 	stream1 << "<h2 style=\"color: #2e6c80;\">Matrix details:</h2>" << endl;
 	stream1 << "<table class=\"editorDemoTable\" style=\"width: 497px; border-style: solid; border-color: blue; float: left; height: 393px;\">" << endl;
@@ -578,22 +589,128 @@ void MatrixCSR::plot(int* ptr, int* y, double* data, int n, double max, double m
 
 typedef unsigned int uint;
 
-void MatrixCSR::plot2(/*int* ptr, int* y, double* data, int n, double max, double min*/) 
+//void MatrixCSR::plot2(int* ptr, int* Y, double* data, int n, double max, double min)
+//{
+//	const char* filename = "portrait.png";
+//	unsigned int x, y,
+//		mod = 1;
+//	int i = 0;
+//
+//	if (n > 400) 
+//	{
+//		n = 400;
+//		mod = n / 400;
+//	}
+//
+//	unsigned int width = n, height = n;
+//	unsigned char* image = new unsigned char[width * height * 4];
+//	for (int j = 0; j < width * height * 4; j++)
+//	{
+//		image[j] = 0;
+//	}
+//	sort(csr_t_aa, csr_t_aa + sz_elem);
+//	double AltitudeTop = 255 * (csr_t_aa[(int)(sz_elem/3)] - min) / (max - min);
+//	double AltitudeDown = 255 * (csr_t_aa[(int)(sz_elem*(2/3))] - min) / (max - min);
+//	for (int row = 0; row < n; row++)
+//	{
+//		for (int k = ptr[row]; k < ptr[row + 1]; k++)
+//		{
+//			x = Y[i] / mod;
+//			y = row / mod;
+//			/*cout << "x = " << x << endl;
+//			cout << "y = " << y << endl;
+//			cout << "4 * width * y + 4 * x + 3 = " << 4 * width * y + 4 * x + 3 << endl;*/
+//			if (x < width && y < height)
+//			{
+//				image[4 * width * y + 4 * x + 0] = 0;
+//				image[4 * width * y + 4 * x + 1] = 0;
+//				image[4 * width * y + 4 * x + 2] = 0;
+//				image[4 * width * y + 4 * x + 3] = 255;
+//
+//				//image[4 * width * y + 4 * x + 3] = 255;
+//				//double Amplitude = 255 * (csr_aa[csr_ja[k]] - min) / (max - min);
+//				////cout << Amplitude <<endl;
+//				////TGAColor currentColor = color(Amplitude, max, min);
+//				//if (Amplitude > AltitudeTop)
+//				//{
+//				//	image[4 * width * y + 4 * x + 2] += Amplitude;
+//				//}
+//				//else
+//				//{
+//				//	if (Amplitude > AltitudeDown)
+//				//	{
+//				//		image[4 * width * y + 4 * x + 1] += Amplitude;
+//				//	}
+//				//	else
+//				//	{
+//				//		image[4 * width * y + 4 * x + 0] += Amplitude;
+//				//	}
+//				//}
+//			}
+//			
+//			i++;
+//		}
+//	}
+//
+//	encodeTwoSteps(filename, image, width, height);
+//	delete[] image;
+//}
+
+void MatrixCSR::plot2(int* ptr, int* Y, double* data, int n, double max, double min)
 {
 	const char* filename = "portrait.png";
-	unsigned width = 512, height = 512;
-	unsigned char* image = new unsigned char[width * height * 4];
-	unsigned x, y;
-	for (y = 0; y < height; y++)
-		for (x = 0; x < width; x++) 
-		{
-			image[4 * width * y + 4 * x + 0] = 255 * !(x & y);
-			image[4 * width * y + 4 * x + 1] = x ^ y;
-			image[4 * width * y + 4 * x + 2] = x | y;
-			image[4 * width * y + 4 * x + 3] = 255;
-		}
 
-	encodeTwoSteps(filename, image,width, height);
+	unsigned int x, y,
+		mod = 1;
+	int size = n,
+		i = 0;
+
+	if (size > 1000) {
+		n = 1000;
+		mod = size / 1000;
+	}
+	unsigned int width = n, height = n;
+	unsigned char* image = new unsigned char[width * height * 4];
+	sort(csr_t_aa, csr_t_aa + sz_elem);
+	double AltitudeTop = 255 * (csr_t_aa[(int)(sz_elem/3)] - min) / (max - min);
+	double AltitudeDown = 255 * (csr_t_aa[(int)(sz_elem*(2/3))] - min) / (max - min);
+	for (int row = 0; row < size; row++) 
+	{
+		for (int k = 0; k < (ptr[row + 1] - ptr[row]); k++)
+		{
+			x = Y[i] / mod;
+			y = (row) / mod;
+			if (x < width && y < height)
+			{
+				image[4 * width * y + 4 * x + 0] = 0;
+				image[4 * width * y + 4 * x + 1] = 0;
+				image[4 * width * y + 4 * x + 2] = 0;
+				image[4 * width * y + 4 * x + 3] = 255;
+
+				double Amplitude = 255 * (csr_aa[csr_ja[k]] - min) / (max - min);
+
+				/*if (Amplitude > AltitudeTop)
+				{
+					image[4 * width * y + 4 * x + 2] += Amplitude;
+				}
+				else
+				{
+					if (Amplitude > AltitudeDown)
+					{
+						image[4 * width * y + 4 * x + 1] += Amplitude;
+					}
+					else
+					{
+						image[4 * width * y + 4 * x + 0] += Amplitude;
+					}
+				}*/
+
+				i++;
+			}
+		}
+	}
+
+	encodeTwoSteps(filename, image, width, height);
 	delete[] image;
 }
 
