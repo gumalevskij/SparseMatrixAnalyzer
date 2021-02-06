@@ -33,7 +33,7 @@ int main()
     mtxCSR.CalculateParameters();
 	end = std::chrono::steady_clock::now();
 	elapsed_seconds = end - start;
-	mtxCSR.TimeTransportation = elapsed_seconds.count();
+	mtxCSR.TimeCalculation = elapsed_seconds.count();
 	cout << "End Calculating" << endl;
 
 	cout << "Start Writing" << endl;

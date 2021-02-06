@@ -3,9 +3,8 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <algorithm>;
+#include <algorithm>
 #include "stdafx.h"
-#include "tgaimage.h"
 #include "lodepng.h"
 
 
@@ -84,11 +83,7 @@ struct MatrixCSR
 	void Create_out_html();
 
 	//portrait
-	const TGAColor white = TGAColor(255, 255, 255, 255);
-	const TGAColor red = TGAColor(255, 0, 0, 255);
-	TGAColor color(double value, double a, double b);
 	void plot(int* ptr, int* y, double* data, int n, double max, double min);
-	void plot2(int* ptr, int* y, double* data, int n, double max, double min);
 	void encodeTwoSteps(const char* filename, const unsigned char* image, unsigned width, unsigned height);
 
 	void Clear();

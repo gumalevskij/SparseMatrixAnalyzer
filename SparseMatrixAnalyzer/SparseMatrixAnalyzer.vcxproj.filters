@@ -21,9 +21,6 @@
     <ClCompile Include="Matrix_CSR.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="tgaimage.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="lodepng.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -33,9 +30,6 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="tgaimage.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="lodepng.h">

@@ -288,6 +288,16 @@ int MatrixCSR::CheckExistenceOfIsolatedSubmatrices()
 						stack[currentStack] = csr_ja[j];
 					}
 				}
+
+				for (int j = csr_t_ia[currentEl]; j < csr_t_ia[currentEl + 1]; j++)
+				{
+					if (!used[csr_t_ja[j]])
+					{
+						used[csr_t_ja[j]] = true;
+						currentStack++;
+						stack[currentStack] = csr_t_ja[j];
+					}
+				}
 			}
 			countComponents++;
 		}
@@ -480,7 +490,6 @@ void MatrixCSR::Create_out_html()
 	path_to_matrix = "out";
 	path_to_picture1 = "portrait.png";
 	plot(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
-	plot2(csr_ia, csr_ja, csr_aa, sz_row, MaxElement, MinElement);
 	char buffer[255];
 	
 	ofstream stream1((path_to_matrix+".out.html").c_str());
@@ -550,113 +559,9 @@ void MatrixCSR::Create_out_html()
 	stream1 << "</tbody> </table> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p><p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> <p>&nbsp;</p> " << endl;
 }
 
-TGAColor MatrixCSR::color(double value, double a, double b) 
-{
-	int fun = round(a * value + b);
-	int k = fun / 256;
-	if (k == 0) return  TGAColor(0, (fun % 256), 255, 255);
-	else if (k == 1) return  TGAColor(0, 255, 255 - (fun % 255), 255);
-	else if (k == 2) return  TGAColor(fun % 255, 255, 0, 255);
-	else if (k == 3) return  TGAColor(255, 255 - (fun % 255), 0, 255);
-	else return  TGAColor(255, 0, 0, 255);
-}
-
-void MatrixCSR::plot(int* ptr, int* y, double* data, int n, double max, double min) {
-	int size = n;//rowptr.size() - 1;
-	int i = 0;
-	int value = 0;
-	int mod = 1;
-	double a = 1020 / (max - min);
-	double b = -min * a;
-
-	if (size > 1999) {
-		n = 1000;
-		mod = size / 1000;
-	}
-	TGAImage image(n, n, TGAImage::RGB);
-	for (int row = 0; row < size; row++) {
-		for (int k = 0; k < (ptr[row + 1] - ptr[row]); k++) {
-			//cout << row << " " << y[i] << endl;
-			image.set((y[i]) / mod, (size - row - 1) / mod, color(data[value], a, b));
-			value++;
-			i++;
-		}
-
-	}
-	image.flip_vertically();
-	image.write_tga_file("output.tga");
-}
-
 typedef unsigned int uint;
 
-//void MatrixCSR::plot2(int* ptr, int* Y, double* data, int n, double max, double min)
-//{
-//	const char* filename = "portrait.png";
-//	unsigned int x, y,
-//		mod = 1;
-//	int i = 0;
-//
-//	if (n > 400) 
-//	{
-//		n = 400;
-//		mod = n / 400;
-//	}
-//
-//	unsigned int width = n, height = n;
-//	unsigned char* image = new unsigned char[width * height * 4];
-//	for (int j = 0; j < width * height * 4; j++)
-//	{
-//		image[j] = 0;
-//	}
-//	sort(csr_t_aa, csr_t_aa + sz_elem);
-//	double AltitudeTop = 255 * (csr_t_aa[(int)(sz_elem/3)] - min) / (max - min);
-//	double AltitudeDown = 255 * (csr_t_aa[(int)(sz_elem*(2/3))] - min) / (max - min);
-//	for (int row = 0; row < n; row++)
-//	{
-//		for (int k = ptr[row]; k < ptr[row + 1]; k++)
-//		{
-//			x = Y[i] / mod;
-//			y = row / mod;
-//			/*cout << "x = " << x << endl;
-//			cout << "y = " << y << endl;
-//			cout << "4 * width * y + 4 * x + 3 = " << 4 * width * y + 4 * x + 3 << endl;*/
-//			if (x < width && y < height)
-//			{
-//				image[4 * width * y + 4 * x + 0] = 0;
-//				image[4 * width * y + 4 * x + 1] = 0;
-//				image[4 * width * y + 4 * x + 2] = 0;
-//				image[4 * width * y + 4 * x + 3] = 255;
-//
-//				//image[4 * width * y + 4 * x + 3] = 255;
-//				//double Amplitude = 255 * (csr_aa[csr_ja[k]] - min) / (max - min);
-//				////cout << Amplitude <<endl;
-//				////TGAColor currentColor = color(Amplitude, max, min);
-//				//if (Amplitude > AltitudeTop)
-//				//{
-//				//	image[4 * width * y + 4 * x + 2] += Amplitude;
-//				//}
-//				//else
-//				//{
-//				//	if (Amplitude > AltitudeDown)
-//				//	{
-//				//		image[4 * width * y + 4 * x + 1] += Amplitude;
-//				//	}
-//				//	else
-//				//	{
-//				//		image[4 * width * y + 4 * x + 0] += Amplitude;
-//				//	}
-//				//}
-//			}
-//			
-//			i++;
-//		}
-//	}
-//
-//	encodeTwoSteps(filename, image, width, height);
-//	delete[] image;
-//}
-
-void MatrixCSR::plot2(int* ptr, int* Y, double* data, int n, double max, double min)
+void MatrixCSR::plot(int* ptr, int* Y, double* data, int n, double max, double min)
 {
 	const char* filename = "portrait.png";
 
@@ -689,21 +594,30 @@ void MatrixCSR::plot2(int* ptr, int* Y, double* data, int n, double max, double 
 
 				double Amplitude = 255 * (csr_aa[csr_ja[k]] - min) / (max - min);
 
-				/*if (Amplitude > AltitudeTop)
+				if (Amplitude > AltitudeTop)
 				{
-					image[4 * width * y + 4 * x + 2] += Amplitude;
+					if (image[4 * width * y + 4 * x + 2] < Amplitude)
+					{
+						image[4 * width * y + 4 * x + 2] = Amplitude;
+					}
 				}
 				else
 				{
 					if (Amplitude > AltitudeDown)
 					{
-						image[4 * width * y + 4 * x + 1] += Amplitude;
+						if (image[4 * width * y + 4 * x + 1] < Amplitude)
+						{
+							image[4 * width * y + 4 * x + 1] = Amplitude;
+						}
 					}
 					else
 					{
-						image[4 * width * y + 4 * x + 0] += Amplitude;
+						if (image[4 * width * y + 4 * x + 0] < Amplitude)
+						{
+							image[4 * width * y + 4 * x + 0] = Amplitude;
+						}
 					}
-				}*/
+				}
 
 				i++;
 			}
