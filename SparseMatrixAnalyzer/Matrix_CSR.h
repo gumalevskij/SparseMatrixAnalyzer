@@ -7,9 +7,9 @@
 #include "stdafx.h"
 #include "lodepng.h"
 
-
-struct MatrixCSR
+class MatrixCSR
 {
+private:
 	//Matrix info
 	int sz_row;
 	int sz_col;
@@ -18,8 +18,8 @@ struct MatrixCSR
 
 	//COO
 	int nnz;
-	int* colA;
 	int* rowA;
+	int* colA;
 	double* valA;
 
 	//CSR
@@ -32,12 +32,16 @@ struct MatrixCSR
 	int* csr_t_ia;
 	int* csr_t_ja;
 	double* csr_t_aa;
+	int* nn;
+	int* reverse_row_index;
 
 	//properties
 	int Nonzeros = 0;
 	bool is_init_data;
 	bool is_symmetrical = true;
 	bool is_structural_symmetrical = true;
+	int is_symmetrical_count = 0;
+	int is_structural_symmetrical_count = 0;
 	double MinElement;
 	double MaxElement;
 	double MinModElement;
@@ -63,6 +67,7 @@ struct MatrixCSR
 	bool *used;
 	int *stack;
 
+public:
 	//Logger
 	double TimeRead;
 	double TimeConvertation;
@@ -71,7 +76,6 @@ struct MatrixCSR
 	double TimeCalculation;
 	void Create_log();
 	//
-
 	int ReadMtx();
 	int ReadSortMtx();
 	int CSRtoCSR_t();
