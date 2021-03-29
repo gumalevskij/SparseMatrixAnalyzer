@@ -1,12 +1,31 @@
 #pragma once
 #include "Matrix_CSR.h"
 
-int main()
+int main(int argc, char* argv[])
 {
+	if (argc <= 1)
+	{
+		// В некоторых операционных системах argv[0] может быть просто пустой строкой, без имени программы
+		// Обрабатываем случай, когда argv[0] может быть пустым или не пустым
+		if (argv[0])
+			std::cout << "Usage: " << argv[0] << " <number>" << '\n';
+		else
+			std::cout << "Usage: <program name> <number>" << '\n';
+
+		exit(1);
+	}
+
+	
+	std::stringstream convert(argv[1]);
+
+	string input;
+	if (!(convert >> input)) // выполняем конвертацию
+		input = "input.mtx"; // если конвертация терпит неудачу, то присваиваем input значение по умолчанию
+
 	MatrixCSR mtxCSR;
 	auto start = std::chrono::steady_clock::now();
 	cout << "Start Reading" << endl;
-	mtxCSR.ReadSortMtx();
+	mtxCSR.ReadSortMtx(input);
 	auto end = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end - start;
 	mtxCSR.TimeRead = elapsed_seconds.count();

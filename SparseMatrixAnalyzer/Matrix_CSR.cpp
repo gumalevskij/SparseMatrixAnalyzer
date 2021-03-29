@@ -69,12 +69,12 @@ static std::vector<std::string> split(const std::string& s, char delim)
 	return elems;
 }
 
-int MatrixCSR::ReadSortMtx()
+int MatrixCSR::ReadSortMtx(string input)
 {
 	ifstream ofp;
 	string line;
 	int nthreads;
-	ofp.open("input.mtx");
+	ofp.open(input);
 	getline(ofp, line);
 	vector<string> parameters;;
 	bool firstLine = true;

@@ -77,7 +77,7 @@ public:
 	void Create_log();
 	//
 	int ReadMtx();
-	int ReadSortMtx();
+	int ReadSortMtx(string input);
 	int CSRtoCSR_t();
 	int Write_csr();
 	int Write_csr_t();
